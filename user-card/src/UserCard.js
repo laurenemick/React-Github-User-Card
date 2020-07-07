@@ -14,7 +14,7 @@ class UserCard extends React.Component {
                     <h4>Followers:</h4>
                     {
                         this.props.followers.map(follower => 
-                            <p><EmojiPeopleIcon />{follower.login}</p>
+                            <p key={follower.id}><EmojiPeopleIcon />{follower.login}</p>
                         )
                     }
                 </div>

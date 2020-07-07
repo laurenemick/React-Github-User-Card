@@ -8,6 +8,7 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
+      searchUser:"laurenemick",
       users: [],
       followers:[]
     }
@@ -23,22 +24,75 @@ class App extends React.Component {
       });
     });
     axios
-    .get('https://api.github.com/users/laurenemick/followers')
-    .then(res => {
-      console.log(res.data)
-      this.setState({
-        followers: res.data
+      .get('https://api.github.com/users/laurenemick/followers')
+      .then(res => {
+        console.log(res.data)
+        this.setState({
+          followers: res.data
+        });
       });
-    });
   }
 
+  componentDidUpdate(prevState) {
+    if (this.state.users !== prevState.users) {
+      if (this.state.searchUser === "") {
+        axios.get('https://api.github.com/users/laurenemick')
+          .then(res => {
+          this.setState({
+            users: res.data,
+            searchUser: "laurenemick" // to avoid infinite loop
+          });
+        });
+      }
+    }
+  }
+
+  handleChanges = e => {
+    this.setState({
+      searchUser: e.target.value
+    });
+  };
+
+  fetchUser = e => {
+    e.preventDefault();
+    axios
+      .get(`https://api.github.com/users/${this.state.searchUser}`)
+      .then(res => {
+        this.setState({
+          users: res.data
+        });
+      });
+    axios
+      .get(`https://api.github.com/users/${this.state.searchUser}/followers`)
+      .then(res => {
+        console.log(res.data)
+        this.setState({
+          followers: res.data
+        });
+      });
+  };
+
   render() {
+    if (this.state.user.length === 0) {
+      return <p>Loading user...</p>;
+    }
     return (
       <div className="App">
-        <UserCard 
-          users={this.state.users} 
-          followers={this.state.followers} 
-        />
+        <div>
+          <input
+            type="text"
+            placeholder="Search for user..."
+            value={this.state.searchUser}
+            onChange={this.handleChanges}
+          />
+          <button onClick={this.fetchUser}>Search</button>
+        </div>
+        <div>
+          <UserCard 
+            users={this.state.users} 
+            followers={this.state.followers} 
+          />
+        </div>
       </div>
     );
   }
